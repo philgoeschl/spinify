@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { Disc3, LogOut, User, Download, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Disc3, LogOut, User, Download, Upload, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -38,6 +37,20 @@ export function Navbar() {
             {link.label}
           </Link>
         ))}
+        {session?.user?.role === "ADMIN" && (
+          <Link
+            href="/admin/users"
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5",
+              pathname.startsWith("/admin")
+                ? "bg-amber-500/15 text-amber-400"
+                : "text-zinc-500 hover:text-amber-400 hover:bg-amber-500/10"
+            )}
+          >
+            <Shield className="w-3.5 h-3.5" />
+            Admin
+          </Link>
+        )}
       </nav>
 
       <div className="flex items-center gap-2">

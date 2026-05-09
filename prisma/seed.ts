@@ -40,13 +40,22 @@ async function main() {
   console.log("Seeding database…");
 
   const password = await bcrypt.hash("password123", 12);
+
+  // Admin account
+  await prisma.user.upsert({
+    where: { email: "admin@spinify.dev" },
+    update: {},
+    create: { email: "admin@spinify.dev", name: "Admin", password, role: "ADMIN" },
+  });
+
+  // Test user with vinyl collection
   const user = await prisma.user.upsert({
     where: { email: "test@spinify.dev" },
     update: {},
     create: { email: "test@spinify.dev", name: "Test User", password },
   });
 
-  console.log(`User: ${user.email}`);
+  console.log(`Users seeded (admin@spinify.dev, test@spinify.dev)`);
 
   for (const data of SAMPLE_VINYLS) {
     // Check if vinyl already exists to make seed idempotent
@@ -83,8 +92,9 @@ async function main() {
     }
   }
 
-  console.log(`Seeded ${SAMPLE_VINYLS.length} vinyls`);
-  console.log("Login: test@spinify.dev / password123");
+  console.log(`Seeded ${SAMPLE_VINYLS.length} vinyls for test@spinify.dev`);
+  console.log("Test user:  test@spinify.dev  / password123");
+  console.log("Admin user: admin@spinify.dev / password123");
 }
 
 main()
