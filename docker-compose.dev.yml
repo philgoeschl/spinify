@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      target: deps
+    command: >
+      sh -c "npx prisma migrate dev --name init --skip-seed 2>/dev/null || true &&
+             npx prisma db seed &&
+             npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./public:/app/public
+      - ./next.config.ts:/app/next.config.ts
+    environment:
+      DATABASE_URL: postgresql://spinify:spinifydev@db:5432/spinify_dev
+      AUTH_SECRET: dev-secret-change-in-production
+      AUTH_URL: http://localhost:3000
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: spinify_dev
+      POSTGRES_USER: spinify
+      POSTGRES_PASSWORD: spinifydev
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spinify -d spinify_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_dev:

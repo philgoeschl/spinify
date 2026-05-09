@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  vinyls    Vinyl[]
+  playLogs  PlayLog[]
+
+  @@map("users")
+}
+
+model Vinyl {
+  id        String    @id @default(cuid())
+  artist    String
+  album     String
+  year      Int
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playLogs  PlayLog[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("vinyls")
+}
+
+model PlayLog {
+  id        String   @id @default(cuid())
+  vinylId   String
+  userId    String
+  playedAt  DateTime @db.Date
+  vinyl     Vinyl    @relation(fields: [vinylId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([vinylId])
+  @@index([userId])
+  @@index([playedAt])
+  @@map("play_logs")
+}
